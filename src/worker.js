@@ -1,35 +1,29 @@
+/* eslint-disable no-restricted-globals */
 import axiosImport from "axios";
 
-// Show somthing in the DOM to show app is ready:
-const div = document.createElement("h1");
-div.textContent = "Hello World";
-document.body.appendChild(div);
-
-// Load worker for testing:
-const worker = new Worker(new URL("./worker.js", import.meta.url));
-worker.postMessage({
-  question: "Is worker up and running?",
-});
-worker.onmessage = ({ data: { answer } }) => {
-  console.log(answer);
+// Show main thread that worker is up and running:
+self.onmessage = ({ data: { question } }) => {
+  self.postMessage({
+    answer: "Yes worker is up and running.",
+  });
 };
 
-// Perform main thread fetch test:
+// Perform worker thread fetch test:
 const axios = axiosImport.create({
   baseURL: "https://goat.niaid.nih.gov/hedwig/api/",
   headers: {
-    Authorization: "Bearer invalid-token-main-thread",
+    Authorization: "Bearer invalid-token-worker",
   },
 });
 const testFetch = async () => {
   try {
     // const dummyAuthResponse = await axios.get("/auth/dummy/huy")
-    // console.log("main thread auth response", dummyAuthResponse)
+    // console.log("worker auth response", dummyAuthResponse)
 
     const projectsResponse = await axios.get("/projects");
-    console.log("main thread projectResponse", projectsResponse);
+    console.log("woroker projectResponse", projectsResponse);
   } catch (error) {
-    console.log("start: error in main thread");
+    console.log("start: error in worker");
     console.log("error", error)
     if (error.response) {
       // The request was made and the server responded with a status code
@@ -46,9 +40,9 @@ const testFetch = async () => {
       // Something happened in setting up the request that triggered an Error
       console.log("Some other error");
     }
-    console.log("end: error in main thread");
+    console.log("end: error in worker");
   }
 };
 
 /* eslint-disable no-unused-expressions */
-testFetch()
+testFetch();
